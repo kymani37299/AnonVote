@@ -31,7 +31,6 @@ name = "anonvote_proto"
 version = "0.1.0"
 dependencies = [
  "prost",
- "tokio",
  "tonic",
  "tonic-build",
 ]

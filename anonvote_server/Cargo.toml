@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 zkp_protocol = { path = "../zkp_protocol" }
+anonvote_proto = { path = "../anonvote_proto" }
+tonic = "0.9"
+prost = "0.11"
+tokio = {version= "1.0", features = ["macros", "rt-multi-thread"]}
