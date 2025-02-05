@@ -1,0 +1,31 @@
+Tech:
+        - ZKP - Chaum-Pedersen
+        - gRPC for communication (tonic)
+    - UI - TBD
+    - Database - TBD
+
+Workflow:
+    Server:
+        1. Run the Server
+        2. In the candidates.txt will be a list of candidates
+        3. Data will be stored in database
+
+    Client:
+        1. ID validation (will not be covered)
+            - We assume user has validated the ID
+            - In response for validated ID user will get random key for registration access
+            - NOTE: Random key is in no way connected to the ID , or any identity!!
+            - Random key only purpose is to grant access to registration, so each individual can register only once
+        2. Registration
+            - User grants access to register when filling the random key they got from validator
+            - Registration grants user with public_key and private_key
+            - public and private keys need to be written by user by hand
+        3. Login
+            - User logs in with the public and private key to the system
+            - NOTE: Login process is not connected to the internet, so no keys is actually sent anywhere
+        4. Voting
+            - User chooses vote
+            - Client sends the vote and the public key to the server
+        5. Validation
+            - Server validates the public key by sending ZKP challenges
+            - If validated, server adds vote and adds public key as voter

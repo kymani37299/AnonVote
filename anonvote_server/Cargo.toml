@@ -1,0 +1,7 @@
+[package]
+name = "anonvote_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zkp_protocol = { path = "../zkp_protocol" }
