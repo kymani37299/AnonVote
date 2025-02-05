@@ -21,8 +21,7 @@ Workflow:
             - Registration grants user with public_key and private_key
             - public and private keys need to be written by user by hand
         3. Login
-            - User logs in with the public and private key to the system
-            - NOTE: Login process is not connected to the internet, so no keys is actually sent anywhere
+            - Login will be loading a private key file (or config)
         4. Voting
             - User chooses vote
             - Client sends the vote and the public key to the server

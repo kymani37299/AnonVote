@@ -1,0 +1,52 @@
+syntax = "proto3";
+package anonvote;
+
+message ValidateIDReq {
+    string id = 1;
+}
+
+message ValidateIDRes {
+    string registrationKey = 1;
+}
+
+message RegisterReq {
+    string registrationKey = 1;
+    bytes a = 2;
+    bytes b = 3;
+    bytes alpha = 4;
+    bytes beta = 5;
+}
+
+message RegisterRes {
+}
+
+message VoteReq {
+    string vote = 1;
+    bytes a = 2;
+    bytes b = 3;
+    bytes alpha = 4;
+    bytes beta = 5;
+    bytes ka = 6;
+    bytes kb = 7;
+}
+
+message VoteRes {
+    string auth_session_id = 1;
+    bytes challenge = 2;
+}
+
+message ValidateVoteReq {
+    string auth_session_id = 1;
+    bytes solution = 2;
+}
+
+message ValidateVoteRes {
+
+}
+
+service AnonVote {
+    rpc ValidateID(ValidateIDReq) returns (ValidateIDRes) {}
+    rpc Register(RegisterReq) returns (RegisterRes) {}
+    rpc Vote(VoteReq) returns (VoteRes) {}
+    rpc ValidateVote(ValidateVoteReq) returns (ValidateVoteRes) {}
+}
