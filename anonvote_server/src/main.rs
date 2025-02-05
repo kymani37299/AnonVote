@@ -1,35 +1,19 @@
-use anonvote_proto::proto::anonvote::anon_vote_server::{AnonVote, AnonVoteServer};
-use anonvote_proto::proto::anonvote::{ValidateIdReq, ValidateIdRes, RegisterReq, RegisterRes, VoteReq, VoteRes, ValidateVoteReq, ValidateVoteRes};
-
-use tonic::{Request, Response, Status, Code, transport::Server};
-
-#[derive(Default)]
-struct AnonVoteImpl {
+mod server_impl;
+mod db;
+mod model {
+    pub mod user_data;
 }
 
-#[tonic::async_trait]
-impl AnonVote for AnonVoteImpl {
-    async fn validate_id(&self, req : Request<ValidateIdReq>) -> Result<Response<ValidateIdRes>, Status> {
-        todo!()
-    }
-
-    async fn register(&self, req : Request<RegisterReq>) -> Result<Response<RegisterRes>, Status> {
-        todo!()
-    }
-
-    async fn vote(&self, req : Request<VoteReq>) -> Result<Response<VoteRes>, Status> {
-        todo!()
-    }
-
-    async fn validate_vote(&self, req : Request<ValidateVoteReq>) -> Result<Response<ValidateVoteRes>, Status> {
-        todo!()
-    }
-}
+use anonvote_proto::proto::anonvote::anon_vote_server::AnonVoteServer;
+use tonic::transport::Server;
+use server_impl::AnonVoteImpl;
+use db::AnonVoteDB;
 
 #[tokio::main]
 async fn main() {
     let addr = "127.0.0.1:50051".to_string();
-    let anonvote_impl = AnonVoteImpl::default();
+    let db = AnonVoteDB::connect();
+    let anonvote_impl = AnonVoteImpl::new(db);
 
     println!("Starting server...");
 

@@ -61,6 +61,22 @@ impl PublicKey {
         let cond2 = *kb == (self.beta.modpow(solution, &zkp_util::p()) * self.b.modpow(challenge, &zkp_util::p())).modpow(&BigUint::from(1u32), &zkp_util::p());
         cond1 && cond2
     }
+
+    pub fn a(&self) -> &BigUint {
+        &self.a
+    }
+
+    pub fn b(&self) -> &BigUint {
+        &self.b
+    }
+
+    pub fn alpha(&self) -> &BigUint {
+        &self.alpha
+    }
+
+    pub fn beta(&self) -> &BigUint {
+        &self.beta
+    }
 }
 
 impl SecretKey {

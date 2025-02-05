@@ -9,3 +9,5 @@ anonvote_proto = { path = "../anonvote_proto" }
 tonic = "0.9"
 prost = "0.11"
 tokio = {version= "1.0", features = ["macros", "rt-multi-thread"]}
+rand = "0.9.0"
+num-bigint = "0.4"
