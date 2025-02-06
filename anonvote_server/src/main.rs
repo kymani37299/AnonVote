@@ -2,6 +2,7 @@ mod server_impl;
 mod db;
 mod model {
     pub mod user_data;
+    pub mod challenge_data;
 }
 
 use anonvote_proto::proto::anonvote::anon_vote_server::AnonVoteServer;

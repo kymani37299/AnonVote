@@ -1,5 +1,6 @@
-use crate::db::{AnonVoteDB, ChallengeData};
+use crate::db::AnonVoteDB;
 use crate::model::user_data::UserData;
+use crate::model::challenge_data::ChallengeData;
 
 use anonvote_proto::proto::anonvote::anon_vote_server::AnonVote;
 use anonvote_proto::proto::anonvote::{ValidateIdReq, ValidateIdRes, RegisterReq, RegisterRes, VoteReq, VoteRes, ValidateVoteReq, ValidateVoteRes};
@@ -149,7 +150,7 @@ impl AnonVote for AnonVoteImpl {
 
         // Generate session_id
         let session_id = AnonVoteImpl::generate_random_string(AUTH_KEY_LEN);
-        let added = self.db.add_challenge(session_id.clone(), challenge);
+        let added = self.db.add_challenge(&session_id.clone(), challenge);
 
         // Edge case - if there is already same session id in the db give internal error to try again
         // TODO: Handle case where we generated same session id 
@@ -163,8 +164,48 @@ impl AnonVote for AnonVoteImpl {
         }))
     }
 
-    async fn validate_vote(&self, _req : Request<ValidateVoteReq>) -> Result<Response<ValidateVoteRes>, Status> {
-        todo!()
+    async fn validate_vote(&self, req : Request<ValidateVoteReq>) -> Result<Response<ValidateVoteRes>, Status> {
+        let req = req.into_inner();
+        let challenge_data = self.db.get_challenge(&req.auth_session_id);
+        let challenge_data = challenge_data.ok_or(Status::new(Code::InvalidArgument, "Invalid session id!"))?;
+        
+        let pending_vote = self.db.get_pending_vote(challenge_data.user_hash);
+        let pending_vote = pending_vote.ok_or(Status::new(Code::InvalidArgument, "The pending vote linked with this session no longer exists!"))?; 
+        
+        // TODO: Check if the vote in request is even needed, maybe we want to hide the initial vote from the validation part
+        if pending_vote != req.vote {
+            return Err(Status::new(Code::InvalidArgument, "The pending vote does not match the vote provided!"));
+        }
+
+        // TODO: Delete the challenge from db if user_data doesn't exist
+        let user_data = self.db.get_user(challenge_data.user_hash);
+        let user_data = user_data.ok_or(Status::new(Code::InvalidArgument, "The user linked with this session no longer exists."))?;
+        let solution = BigUint::from_bytes_be(&req.solution);
+
+        let verified = user_data.key.verify(&challenge_data.ka, &challenge_data.kb, &challenge_data.challenge, &solution);
+        if !verified {
+            return Err(Status::new(Code::InvalidArgument, "The solution provided is not verified!"));
+        }
+
+        let removed = self.db.remove_challenge(&req.auth_session_id);
+        if !removed {
+            // We did find the challenge at the beggining, someone else also tried to verify the challenge
+            // at the same time. We will mark this as internal error for now.
+            return Err(Status::new(Code::Internal, "Internal error E0001!"));
+        }
+
+        let pending_vote = self.db.get_and_remove_pending_vote(challenge_data.user_hash);
+
+        // Similar error as E0001
+        let pending_vote = pending_vote.ok_or(Status::new(Code::Internal, "Internal error E0002!"))?;
+
+        let added = self.db.add_vote(challenge_data.user_hash, pending_vote);
+        if !added {
+            // Similar error as E0001
+            return Err(Status::new(Code::Internal, "Internal error E0003!"));
+        }
+
+        Ok(Response::new(ValidateVoteRes { }))
     }
 }
 
@@ -281,9 +322,17 @@ mod test {
         assert!(register_res.is_err(), "Did not throw error while trying to register with same public key twice");
     }
 
-    async fn register_user(server_impl : &AnonVoteImpl, id : String, _secret_key : &SecretKey, public_key : &PublicKey) {
+    struct TestUserData(String, SecretKey, PublicKey);
+
+    async fn generate_user(id : &str, secret_key : u32) -> TestUserData {
+        let sk = SecretKey::new(BigUint::from(secret_key));
+        let pk = sk.generate_public_key();
+        TestUserData(String::from(id), sk, pk)
+    }
+
+    async fn register_user(server_impl : &AnonVoteImpl, user: &TestUserData) {
         let validate_req = Request::new(ValidateIdReq {
-            id
+            id : user.0.clone()
         });
         let validate_res = server_impl.validate_id(validate_req).await;
         assert!(validate_res.is_ok(), "Did throw error while passing valid ID");
@@ -292,10 +341,10 @@ mod test {
 
         let register_req = Request::new(RegisterReq {
             registration_key : registration_key,
-            a : public_key.a().to_bytes_be(),
-            b : public_key.b().to_bytes_be(),
-            alpha : public_key.alpha().to_bytes_be(),
-            beta : public_key.beta().to_bytes_be(),
+            a : user.2.a().to_bytes_be(),
+            b : user.2.b().to_bytes_be(),
+            alpha : user.2.alpha().to_bytes_be(),
+            beta : user.2.beta().to_bytes_be(),
         });
 
         let register_res = server_impl.register(register_req).await;
@@ -307,19 +356,16 @@ mod test {
         let db = AnonVoteDB::connect();
         let server_impl = AnonVoteImpl::new(db, 3);
 
-        let id = String::from("12345");
-        let secret_key = SecretKey::new(BigUint::from(123456789u32));
-        let public_key = secret_key.generate_public_key();
+        let user1 = generate_user("12345", 123456789u32).await;
+        register_user(&server_impl, &user1).await;
 
-        register_user(&server_impl, id, &secret_key, &public_key).await;
-
-        let (_, ka,kb) = public_key.generate_challenge_request();
+        let (_, ka,kb) = user1.2.generate_challenge_request();
         let vote_req = Request::new(VoteReq {
             vote : 1,
-            alpha : public_key.alpha().to_bytes_be(),
-            beta : public_key.beta().to_bytes_be(),
-            a : public_key.a().to_bytes_be(),
-            b : public_key.b().to_bytes_be(),
+            alpha : user1.2.alpha().to_bytes_be(),
+            beta : user1.2.beta().to_bytes_be(),
+            a : user1.2.a().to_bytes_be(),
+            b : user1.2.b().to_bytes_be(),
             ka : ka.to_bytes_be(),
             kb : kb.to_bytes_be()
         });
@@ -327,13 +373,13 @@ mod test {
         let vote_res = server_impl.vote(vote_req).await;
         assert!(vote_res.is_ok(), "Did throw error while voting correctly. Error: {:?}",vote_res);
 
-        let (_, ka,kb) = public_key.generate_challenge_request();
+        let (_, ka,kb) = user1.2.generate_challenge_request();
         let vote_req = Request::new(VoteReq {
             vote : 0,
-            alpha : public_key.alpha().to_bytes_be(),
-            beta : public_key.beta().to_bytes_be(),
-            a : public_key.a().to_bytes_be(),
-            b : public_key.b().to_bytes_be(),
+            alpha : user1.2.alpha().to_bytes_be(),
+            beta : user1.2.beta().to_bytes_be(),
+            a : user1.2.a().to_bytes_be(),
+            b : user1.2.b().to_bytes_be(),
             ka : ka.to_bytes_be(),
             kb : kb.to_bytes_be()
         });
@@ -341,22 +387,19 @@ mod test {
         let vote_res = server_impl.vote(vote_req).await;
         assert!(vote_res.is_err(), "Did not throw error while voting again");
 
-        let id = String::from("54321");
-        let secret_key = SecretKey::new(BigUint::from(4135164u32));
-        let public_key = secret_key.generate_public_key();
+        let user2 = generate_user("54321", 4135164u32).await;
+        let other_secret_key = SecretKey::new(BigUint::from(5315314u32));
+        let other_public_key = other_secret_key.generate_public_key();
 
-        let secret_key2 = SecretKey::new(BigUint::from(5315314u32));
-        let public_key2 = secret_key2.generate_public_key();
+        register_user(&server_impl, &user2).await;
 
-        register_user(&server_impl, id, &secret_key, &public_key).await;
-
-        let (_, ka,kb) = public_key.generate_challenge_request();
+        let (_, ka,kb) = user2.2.generate_challenge_request();
         let vote_req = Request::new(VoteReq {
             vote : 2,
             alpha : vec!(),
-            beta : public_key.beta().to_bytes_be(),
-            a : public_key.a().to_bytes_be(),
-            b : public_key.b().to_bytes_be(),
+            beta : user2.2.beta().to_bytes_be(),
+            a : user2.2.a().to_bytes_be(),
+            b : user2.2.b().to_bytes_be(),
             ka : ka.to_bytes_be(),
             kb : kb.to_bytes_be()
         });
@@ -364,13 +407,13 @@ mod test {
         let vote_res = server_impl.vote(vote_req).await;
         assert!(vote_res.is_err(), "Did not throw error while passing invalid user data");
 
-        let (_, ka,kb) = public_key.generate_challenge_request();
+        let (_, ka,kb) = user2.2.generate_challenge_request();
         let vote_req = Request::new(VoteReq {
             vote : 10,
-            alpha : public_key.alpha().to_bytes_be(),
-            beta : public_key.beta().to_bytes_be(),
-            a : public_key.a().to_bytes_be(),
-            b : public_key.b().to_bytes_be(),
+            alpha : user2.2.alpha().to_bytes_be(),
+            beta : user2.2.beta().to_bytes_be(),
+            a : user2.2.a().to_bytes_be(),
+            b : user2.2.b().to_bytes_be(),
             ka : ka.to_bytes_be(),
             kb : kb.to_bytes_be()
         });
@@ -378,13 +421,13 @@ mod test {
         let vote_res = server_impl.vote(vote_req).await;
         assert!(vote_res.is_err(), "Did not throw error while passing invalid vote");
 
-        let (_, ka,kb) = public_key2.generate_challenge_request();
+        let (_, ka,kb) = other_public_key.generate_challenge_request();
         let vote_req = Request::new(VoteReq {
-            vote : 10,
-            alpha : public_key2.alpha().to_bytes_be(),
-            beta : public_key2.beta().to_bytes_be(),
-            a : public_key2.a().to_bytes_be(),
-            b : public_key2.b().to_bytes_be(),
+            vote : 2,
+            alpha : other_public_key.alpha().to_bytes_be(),
+            beta : other_public_key.beta().to_bytes_be(),
+            a : other_public_key.a().to_bytes_be(),
+            b : other_public_key.b().to_bytes_be(),
             ka : ka.to_bytes_be(),
             kb : kb.to_bytes_be()
         });
@@ -393,4 +436,86 @@ mod test {
         assert!(vote_res.is_err(), "Did not throw error while passing unregistered user");
     }
 
+    async fn vote(server_impl : &AnonVoteImpl, user : &TestUserData, vote : u32) -> (String, BigUint, BigUint) {
+        register_user(&server_impl, user).await;
+
+        let (k, ka,kb) = user.2.generate_challenge_request();
+        let vote_req = Request::new(VoteReq {
+            vote,
+            alpha : user.2.alpha().to_bytes_be(),
+            beta : user.2.beta().to_bytes_be(),
+            a : user.2.a().to_bytes_be(),
+            b : user.2.b().to_bytes_be(),
+            ka : ka.to_bytes_be(),
+            kb : kb.to_bytes_be()
+        });
+
+        let vote_res = server_impl.vote(vote_req).await;
+        assert!(vote_res.is_ok(), "Did throw error while voting correctly. Error: {:?}",vote_res);
+
+        let vote_res = vote_res.unwrap().into_inner();
+        (vote_res.auth_session_id, k, BigUint::from_bytes_be(&vote_res.challenge))
+    }
+
+    #[tokio::test]
+    async fn test_verify() {
+        let db = AnonVoteDB::connect();
+        let server_impl = AnonVoteImpl::new(db, 3);
+
+        let user = generate_user("12345", 12341u32).await;
+        let (auth_session_id, k, c) = vote(&server_impl, &user, 1).await;
+
+        let solution = user.1.solve(&k, &c);
+
+        let validate_req = Request::new(ValidateVoteReq {
+            auth_session_id : auth_session_id.clone(),
+            solution : solution.to_bytes_be(),
+            vote : 1
+        });
+
+        let validate_res = server_impl.validate_vote(validate_req).await;
+        assert!(validate_res.is_ok(), "Did throw error while voting correctly. Error: {:?}",validate_res);
+
+        let validate_req = Request::new(ValidateVoteReq {
+            auth_session_id : auth_session_id.clone(),
+            solution : solution.to_bytes_be(),
+            vote : 1
+        });
+
+        let validate_res = server_impl.validate_vote(validate_req).await;
+        assert!(validate_res.is_err(), "Did not throw error while trying to validate correctly twice");
+
+        let user = generate_user("13345", 423211u32).await;
+        let (auth_session_id, k, c) = vote(&server_impl, &user, 1).await;
+
+        let solution = user.1.solve(&k, &c) - BigUint::from(1u32);
+
+        let validate_req = Request::new(ValidateVoteReq {
+            auth_session_id : auth_session_id.clone(),
+            solution : solution.to_bytes_be(),
+            vote : 1
+        });
+
+        let validate_res = server_impl.validate_vote(validate_req).await;
+        assert!(validate_res.is_err(), "Did not throw error while not giving correct solution.");
+
+        let validate_req = Request::new(ValidateVoteReq {
+            auth_session_id : auth_session_id.clone(),
+            solution : solution.to_bytes_be(),
+            vote : 2
+        });
+
+        let validate_res = server_impl.validate_vote(validate_req).await;
+        assert!(validate_res.is_err(), "Did not throw error while not giving valid vote.");
+
+        let validate_req = Request::new(ValidateVoteReq {
+            auth_session_id : "dsadasadas".to_string(),
+            solution : solution.to_bytes_be(),
+            vote : 1
+        });
+
+        let validate_res = server_impl.validate_vote(validate_req).await;
+        assert!(validate_res.is_err(), "Did not throw error while not giving valid auth session id.");
+        
+    }
 }

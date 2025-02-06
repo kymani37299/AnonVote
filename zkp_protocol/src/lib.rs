@@ -35,7 +35,7 @@ pub struct SecretKey {
     secret : BigUint,
 }
 
-#[derive(Hash)]
+#[derive(Hash, Clone)]
 pub struct PublicKey {
     a : BigUint,
     b : BigUint,

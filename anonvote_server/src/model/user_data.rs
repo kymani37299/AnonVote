@@ -3,7 +3,7 @@ use std::collections::hash_map::DefaultHasher;
 
 use zkp_protocol::PublicKey;
 
-#[derive(Hash)]
+#[derive(Hash, Clone)]
 pub struct UserData {
     pub key : PublicKey,
 }

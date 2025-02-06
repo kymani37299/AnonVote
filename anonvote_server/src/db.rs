@@ -1,16 +1,10 @@
 use std::collections::{HashSet, HashMap};
 use std::sync::Mutex;
 
-use num_bigint::BigUint;
-
 use crate::model::user_data::UserData;
+use crate::model::challenge_data::ChallengeData;
 
-pub struct ChallengeData {
-    pub user_hash : u64,
-    pub challenge : BigUint,
-    pub ka : BigUint,
-    pub kb : BigUint,
-}
+
 
 #[derive(Default)]
 pub struct AnonVoteDB {
@@ -57,6 +51,11 @@ impl AnonVoteDB {
         reg_users_map.contains_key(&user_hash)
     }
 
+    pub fn get_user(&self, user_hash : u64) -> Option<UserData> {
+        let reg_users_map =  &mut self.registered_users.lock().unwrap();
+        reg_users_map.get(&user_hash).cloned()
+    }
+
     pub fn add_pending_vote(&self, user_hash : u64, vote : u32) -> bool {
         let pending_votes_map = &mut self.pending_votes.lock().unwrap();
         if pending_votes_map.contains_key(&user_hash) {
@@ -64,6 +63,16 @@ impl AnonVoteDB {
         }
         pending_votes_map.insert(user_hash, vote);
         return true;
+    }
+
+    pub fn get_pending_vote(&self, user_hash : u64) -> Option<u32> {
+        let pending_votes_map = &mut self.pending_votes.lock().unwrap();
+        pending_votes_map.get(&user_hash).cloned()
+    }
+
+    pub fn get_and_remove_pending_vote(&self, user_hash : u64) -> Option<u32> {
+        let pending_votes_map = &mut self.pending_votes.lock().unwrap();
+        pending_votes_map.remove(&user_hash)
     }
 
     pub fn add_vote(&self, user_hash : u64, vote : u32) -> bool {
@@ -75,13 +84,23 @@ impl AnonVoteDB {
         return true;
     }
 
-    pub fn add_challenge(&self, session_id : String, challenge_data : ChallengeData) -> bool {
+    pub fn add_challenge(&self, session_id : &String, challenge_data : ChallengeData) -> bool {
         let challenges = &mut self.challenge_map.lock().unwrap();
-        if challenges.contains_key(&session_id) {
+        if challenges.contains_key(session_id) {
             return false;
         }
-        challenges.insert(session_id, challenge_data);
+        challenges.insert(session_id.clone(), challenge_data);
         return true;
+    }
+
+    pub fn get_challenge(&self, session_id : &String) -> Option<ChallengeData> {
+        let challenges = &mut self.challenge_map.lock().unwrap();
+        challenges.get(session_id).cloned()
+    }
+
+    pub fn remove_challenge(&self, session_id : &String) -> bool {
+        let challenges = &mut self.challenge_map.lock().unwrap();
+        challenges.remove(session_id).is_some()
     }
 
     pub fn user_voted(&self, user_hash : u64) -> bool {
