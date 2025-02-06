@@ -35,6 +35,7 @@ pub struct SecretKey {
     secret : BigUint,
 }
 
+#[derive(Hash)]
 pub struct PublicKey {
     a : BigUint,
     b : BigUint,
@@ -46,6 +47,15 @@ impl PublicKey {
     pub fn new(a : BigUint, b : BigUint, alpha : BigUint, beta : BigUint) -> PublicKey {
         PublicKey {
             a,b,alpha,beta
+        }
+    }
+
+    pub fn from(a : Vec<u8>, b : Vec<u8>, alpha : Vec<u8>, beta : Vec<u8>) -> PublicKey {
+        PublicKey {
+            a : BigUint::from_bytes_be(&a),
+            b : BigUint::from_bytes_be(&b),
+            alpha : BigUint::from_bytes_be(&alpha),
+            beta : BigUint::from_bytes_be(&beta),
         }
     }
 

@@ -1,12 +1,11 @@
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 
+use zkp_protocol::PublicKey;
+
 #[derive(Hash)]
 pub struct UserData {
-    pub a : Vec<u8>,
-    pub b : Vec<u8>,
-    pub alpha : Vec<u8>,
-    pub beta : Vec<u8>,
+    pub key : PublicKey,
 }
 
 impl UserData {
@@ -19,23 +18,18 @@ impl UserData {
 
 #[cfg(test)]
 mod test {
+    use num_bigint::BigUint;
+
     use super::*;
 
     #[test]
     fn test_hash() {
-        let data1 = UserData{
-            a : vec!(1,2,3),
-            b: vec!(4,5),
-            alpha: vec!(6),
-            beta: vec!(7,8),
-        };
 
-        let data2 = UserData{
-            a : vec!(1,2,3),
-            b: vec!(4,5),
-            alpha: vec!(6),
-            beta: vec!(7,8),
-        };
+        let data1 = PublicKey::new(BigUint::from(1u32), BigUint::from(2u32), BigUint::from(3u32),BigUint::from(4u32)); 
+        let data2 = PublicKey::new(BigUint::from(1u32), BigUint::from(2u32), BigUint::from(3u32),BigUint::from(4u32)); 
+
+        let data1 = UserData{ key: data1};
+        let data2 = UserData{ key: data2};
 
         let hash1 = data1.get_hash();
         let hash2 = data2.get_hash();

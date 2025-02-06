@@ -21,7 +21,7 @@ message RegisterRes {
 }
 
 message VoteReq {
-    string vote = 1;
+    uint32 vote = 1;
     bytes a = 2;
     bytes b = 3;
     bytes alpha = 4;
@@ -37,11 +37,11 @@ message VoteRes {
 
 message ValidateVoteReq {
     string auth_session_id = 1;
-    bytes solution = 2;
+    uint32 vote = 2;
+    bytes solution = 3;
 }
 
 message ValidateVoteRes {
-
 }
 
 service AnonVote {

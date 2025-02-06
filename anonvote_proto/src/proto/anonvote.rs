@@ -30,8 +30,8 @@ pub struct RegisterRes {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VoteReq {
-    #[prost(string, tag = "1")]
-    pub vote: ::prost::alloc::string::String,
+    #[prost(uint32, tag = "1")]
+    pub vote: u32,
     #[prost(bytes = "vec", tag = "2")]
     pub a: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "3")]
@@ -58,7 +58,9 @@ pub struct VoteRes {
 pub struct ValidateVoteReq {
     #[prost(string, tag = "1")]
     pub auth_session_id: ::prost::alloc::string::String,
-    #[prost(bytes = "vec", tag = "2")]
+    #[prost(uint32, tag = "2")]
+    pub vote: u32,
+    #[prost(bytes = "vec", tag = "3")]
     pub solution: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
