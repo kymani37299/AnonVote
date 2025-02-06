@@ -27,6 +27,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "anonvote_client"
+version = "0.1.0"
+dependencies = [
+ "anonvote_proto",
+ "num-bigint",
+ "tokio",
+ "tonic",
+ "zkp_protocol",
+]
+
+[[package]]
 name = "anonvote_proto"
 version = "0.1.0"
 dependencies = [

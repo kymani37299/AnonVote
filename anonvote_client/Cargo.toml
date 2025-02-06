@@ -1,0 +1,12 @@
+[package]
+name = "anonvote_client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zkp_protocol = { path = "../zkp_protocol" }
+anonvote_proto = { path = "../anonvote_proto" }
+
+tonic = "0.9"
+tokio = {version= "1.0", features = ["macros", "rt-multi-thread"]}
+num-bigint = "0.4"

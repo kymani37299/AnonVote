@@ -96,6 +96,13 @@ impl SecretKey {
         }
     }
 
+    pub fn generate() -> SecretKey {
+        let secret = zkp_util::generate_random_below(&zkp_util::q());
+        SecretKey {
+            secret
+        }
+    }
+
     pub fn generate_public_key(&self) -> PublicKey {
         let beta = zkp_util::alpha().modpow(&zkp_util::generate_random_below(&zkp_util::q()), &zkp_util::p());
         let alpha = zkp_util::alpha();
