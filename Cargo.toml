@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "anonvote_proto",
+  "anonvote_server",
+  "zkp_protocol",
+]
