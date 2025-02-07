@@ -7,6 +7,27 @@ function showSection(section) {
     document.getElementById(section).style.display = 'block';
 }
 
+function api_call(path, body_str, onOk, onError) {
+    fetch(path, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: body_str
+      })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                const errorMessage = errorData.details || 'An unknown error occurred.';
+                throw new Error(`${errorMessage}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => onOk(data))
+    .catch(error => onError(error));
+}
+
 function validateID() {
     const idFile = document.getElementById('idFile').files[0];
     const idNumber = document.getElementById('idNumber').value;
@@ -16,31 +37,19 @@ function validateID() {
         message.innerHTML = 'Please upload an ID image and enter the ID number.';
         message.style.color = 'red';
     } else {
-        fetch('/validate_id', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
+        api_call(
+            '/validate_id', 
+            JSON.stringify({ id: idNumber }),
+            data => {
+                const registrationKey = data.registrationKey;
+                message.innerHTML = 'ID validated successfully! Registration key: ' + registrationKey;
+                message.style.color = 'green';
             },
-            body: JSON.stringify({ id: idNumber })
-          })
-          .then(response => {
-            if (!response.ok) {
-                return response.json().then(errorData => {
-                    const errorMessage = errorData.details || 'An unknown error occurred.';
-                    throw new Error(`${errorMessage}`);
-                });
+            error => {
+                message.innerHTML = error;
+                message.style.color = 'red';
             }
-            return response.json();
-        })
-          .then(data => {
-            const registrationKey = data.registrationKey;
-            message.innerHTML = 'ID validated successfully! Registration key: ' + registrationKey;
-            message.style.color = 'green';
-          })
-          .catch(error => {
-            message.innerHTML = error;
-            message.style.color = 'red';
-          });
+        );
     }
 }
 
