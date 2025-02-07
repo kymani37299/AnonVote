@@ -1,5 +1,6 @@
 [workspace]
-members = [ "anonvote_client",
+members = [ 
+  "anonvote_client_cli",
   "anonvote_proto",
   "anonvote_server",
   "zkp_protocol",

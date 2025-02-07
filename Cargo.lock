@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "anonvote_client"
+name = "anonvote_client_cli"
 version = "0.1.0"
 dependencies = [
  "anonvote_proto",
