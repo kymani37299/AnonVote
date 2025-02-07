@@ -44,7 +44,7 @@ async fn main() {
         alpha : public_key.alpha().to_bytes_be(),
         beta : public_key.beta().to_bytes_be()
     }).await;
-    let res = handle_response(res).into_inner();
+    let _res = handle_response(res).into_inner();
 
     let vote = input_string("Enter a vote").parse().unwrap();
 
