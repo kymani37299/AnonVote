@@ -2,6 +2,6 @@
 members = [ 
   "anonvote_client_cli",
   "anonvote_proto",
-  "anonvote_server",
+  "anonvote_server", "anonvote_wasm",
   "zkp_protocol",
 ]

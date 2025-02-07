@@ -1,3 +1,10 @@
+import init, {add} from "./anonvote_wasm/anonvote_wasm.js"
+
+init().then(wasm => {
+    console.log("Wasm initialized");
+    console.log(add(1+2));
+});
+
 function showSection(section) {
     // Hide all sections
     const sections = document.querySelectorAll('.section');

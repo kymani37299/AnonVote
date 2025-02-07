@@ -5,5 +5,6 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8"
-num-bigint = { version="0.4", features= ["rand"] }
+num-bigint = { version = "0.4", features = ["rand"] }
 hex = "0.4.3"
+getrandom = { version = "0.2", features = ["js"] } # Need this in order to support wasm compiling of anonvote_wasm
