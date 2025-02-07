@@ -3,12 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnonVote</title>
+    <title>Static Website with 3 Sections</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <input type="text" id="idInput" placeholder="Enter your ID">
-    <button id="validateButton">Validate</button>
-    <p id="registrationCode"></p>
-    <script src="./index.js"></script>
+
+<div class="container">
+    <h1>Select an Option</h1>
+    <div class="menu">
+        <button onclick="showSection('validate')">Validate ID</button>
+        <button onclick="showSection('register')">Register</button>
+        <button onclick="showSection('vote')">Vote</button>
+    </div>
+
+    <!-- Validate ID Section -->
+    <div id="validate" class="section" style="display: none;">
+        <h2>Validate ID</h2>
+        <input type="file" id="idFile" accept="image/*">
+        <input type="text" id="idNumber" placeholder="Enter ID Number">
+        <button onclick="validateID()">Submit</button>
+        <p id="validateMessage"></p>
+    </div>
+
+    <!-- Register Section -->
+    <div id="register" class="section" style="display: none;">
+        <h2>Register</h2>
+        <input type="text" id="registrationCode" placeholder="Enter Registration Code">
+        <button onclick="registerUser()">Register</button>
+        <p id="registerMessage"></p>
+    </div>
+
+    <!-- Vote Section -->
+    <div id="vote" class="section" style="display: none;">
+        <h2>Vote</h2>
+        <input type="file" id="secretKeyFile" accept=".txt">
+        <div>
+            <input type="radio" id="option1" name="vote" value="Option 1">
+            <label for="option1">Option 1</label>
+        </div>
+        <div>
+            <input type="radio" id="option2" name="vote" value="Option 2">
+            <label for="option2">Option 2</label>
+        </div>
+        <button onclick="submitVote()">Submit Vote</button>
+        <p id="voteMessage"></p>
+    </div>
+</div>
+
+<script src="index.js"></script>
 </body>
 </html>
