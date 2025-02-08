@@ -96,6 +96,12 @@ impl SecretKey {
         }
     }
 
+    pub fn from_bytes_be(bytes : &Vec<u8>) -> SecretKey {
+        SecretKey {
+            secret : BigUint::from_bytes_be(&bytes)
+        }
+    }
+
     pub fn generate() -> SecretKey {
         let secret = zkp_util::generate_random_below(&zkp_util::q());
         SecretKey {
@@ -116,6 +122,10 @@ impl SecretKey {
             return (k - challenge * &self.secret).modpow(&BigUint::from(1u32), &zkp_util::q());
         }
         return &zkp_util::q() - (challenge * &self.secret - k).modpow(&BigUint::from(1u32), &zkp_util::q());
+    }
+
+    pub fn secret(&self) -> &BigUint {
+        &self.secret
     }
 }
 

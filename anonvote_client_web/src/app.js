@@ -24,12 +24,21 @@ app.post('/validate_id', (req, res) => {
     const id = req.body.id || '';
     client.ValidateID({ id }, (error, response) => {
       if (error) {
-        console.log(error);
         return res.status(500).send(error);
       }
       res.json(response);
     });
   });
+
+app.post('/register', (req, res) => {
+  const message = req.body || undefined;
+  client.Register(message, (error, response) => {
+    if (error) {
+      return res.status(500).send(error);
+    }
+    res.json(response);
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

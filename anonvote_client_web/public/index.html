@@ -9,11 +9,10 @@
 <body>
 
 <div class="container">
-    <h1>Select an Option</h1>
     <div class="menu">
-        <button onclick="showSection('validate')">Validate ID</button>
-        <button onclick="showSection('register')">Register</button>
-        <button onclick="showSection('vote')">Vote</button>
+        <button id="validateIdSection">Validate ID</button>
+        <button id="registerSection">Register</button>
+        <button id="voteSection">Vote</button>
     </div>
 
     <!-- Validate ID Section -->
@@ -21,7 +20,7 @@
         <h2>Validate ID</h2>
         <input type="file" id="idFile" accept="image/*">
         <input type="text" id="idNumber" placeholder="Enter ID Number">
-        <button onclick="validateID()">Submit</button>
+        <button id="validateIdButton">Submit</button>
         <p id="validateMessage"></p>
     </div>
 
@@ -29,7 +28,7 @@
     <div id="register" class="section" style="display: none;">
         <h2>Register</h2>
         <input type="text" id="registrationCode" placeholder="Enter Registration Code">
-        <button onclick="registerUser()">Register</button>
+        <button id="registerUserButton">Register</button>
         <p id="registerMessage"></p>
     </div>
 
@@ -45,11 +44,13 @@
             <input type="radio" id="option2" name="vote" value="Option 2">
             <label for="option2">Option 2</label>
         </div>
-        <button onclick="submitVote()">Submit Vote</button>
+        <button id="submitVoteButton">Submit Vote</button>
         <p id="voteMessage"></p>
     </div>
 </div>
 
+<script src="anonvote_wasm.js" type="module"></script>
 <script src="index.js" type="module"></script>
+
 </body>
 </html>
