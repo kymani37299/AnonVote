@@ -91,10 +91,10 @@ app.post('/vote', (req, res) => {
 
 app.post('/validate_vote', (req, res) => {
   const {auth_session_id, vote, solution} = req.body;
-  const solutionBytes = a ? convertToUint8Array(solution) : null;
+  const solutionBytes = solution ? convertToUint8Array(solution) : null;
 
   const message = {
-    auth_session_id : auth_session_id,
+    authSessionId : String(auth_session_id),
     vote : vote,
     solution : solutionBytes
   };

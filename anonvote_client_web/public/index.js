@@ -185,11 +185,11 @@ async function submitVote() {
     const challengeReq = keyPair.public_key.generate_challenge_request();
 
     let voteReq = {
-        vote : voteOption,
-        a : keyPair.a,
-        b : keyPair.b,
-        alpha : keyPair.alpha,
-        beta : keyPair.beta,
+        vote : voteOptionInt,
+        a : keyPair.public_key.a(),
+        b : keyPair.public_key.b(),
+        alpha : keyPair.public_key.alpha(),
+        beta : keyPair.public_key.beta(),
         ka : challengeReq.ka(),
         kb : challengeReq.kb()
     };
@@ -200,7 +200,7 @@ async function submitVote() {
         (data) => {
             message.innerHTML = 'Authentication...';
             message.style.color = 'blue';
-            validateVote(voteOption, keyPair, challengeReq, data.challenge, data.auth_session_id);
+            validateVote(voteOptionInt, keyPair, challengeReq, data.challenge, data.authSessionId);
         },
         (error) => {
             message.innerHTML = error;
@@ -220,7 +220,7 @@ function validateVote(vote, keyPair, challengeReq, challenge, session_id) {
     };
 
     api_call(
-        'validate_vote',
+        '/validate_vote',
         JSON.stringify(validationReq),
         _ => {
             message.innerHTML = 'Voting finished!';
