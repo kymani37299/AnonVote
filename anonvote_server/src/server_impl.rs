@@ -80,6 +80,8 @@ impl AnonVote for AnonVoteImpl {
     }
 
     async fn register(&self, req : Request<RegisterReq>) -> Result<Response<RegisterRes>, Status> {
+        println!("Register request: {:?}", req);
+
         // TODO: Sort the registration code multiple locks, maybe there is some vurneability
         // Since we are removing and re-adding the code in some cases
 

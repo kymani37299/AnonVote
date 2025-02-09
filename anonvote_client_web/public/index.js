@@ -1,4 +1,6 @@
-import { generate_key_pair  } from "./anonvote_wasm.js";
+import { generate_key_pair, key_pair_to_json  } from "./anonvote_wasm.js";
+
+const keyFileName = "userKey.anonvote";
 
 window.addEventListener('load', setup);
 
@@ -38,7 +40,7 @@ function downloadFile(content) {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'secret_key.anonvote';
+    link.download = keyFileName;
     link.click();
 }
 
@@ -96,14 +98,7 @@ function registerUser() {
         message.innerHTML = 'Invalid registration code.';
         message.style.color = 'red';
     } else {
-        const generated_key = generate_key_pair();  
-        console.log("Keys generated!");
-        console.log("WASM: ", generated_key);
-        console.log("Secret: ", generated_key.secret_key.secret());
-        console.log("a: ", generated_key.public_key.a());
-        console.log("b: ", generated_key.public_key.b());
-        console.log("alpha: ", generated_key.public_key.alpha());
-        console.log("beta: ", generated_key.public_key.beta());
+        const generated_key = generate_key_pair();
         const registerReq = {
             registrationKey : registrationCode,
             a : generated_key.public_key.a(),
@@ -118,7 +113,7 @@ function registerUser() {
             '/register', 
             JSON.stringify(registerReq),
             _ => {
-                downloadFile(JSON.stringify(generated_key));
+                downloadFile(JSON.stringify(key_pair_to_json(generated_key)));
                 message.innerHTML = 'Registered successfully! Please download private key file.';
                 message.style.color = 'green';
             },

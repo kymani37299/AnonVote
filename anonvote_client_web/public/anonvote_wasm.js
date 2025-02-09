@@ -18,3 +18,14 @@ export function generate_key_pair() {
         public_key : public_key
     };
 }
+
+export function key_pair_to_json(key_pair) {
+    const jsObject = {
+        secret : key_pair.secret_key.secret(),
+        a : key_pair.public_key.a(),
+        b : key_pair.public_key.b(),
+        alpha : key_pair.public_key.alpha(),
+        beta : key_pair.public_key.beta()
+    };
+    return JSON.stringify(jsObject);
+}

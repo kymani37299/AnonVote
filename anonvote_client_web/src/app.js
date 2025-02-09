@@ -13,6 +13,11 @@ const packageDefinition = protoLoader.loadSync(path.join(__dirname, 'anonvote.pr
 const proto = grpc.loadPackageDefinition(packageDefinition).anonvote;
 const client = new proto.AnonVote(anonvote_server_address, grpc.credentials.createInsecure());
 
+// Utility
+const convertToUint8Array = (obj) => {
+  return new Uint8Array(Object.values(obj));
+};
+
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -31,7 +36,22 @@ app.post('/validate_id', (req, res) => {
   });
 
 app.post('/register', (req, res) => {
-  const message = req.body || undefined;
+  const { registrationKey, a, b, alpha, beta } = req.body;
+
+  // Ensure all byte arrays are Uint8Arrays
+  const aBytes = a ? convertToUint8Array(a) : null;
+  const bBytes = b ? convertToUint8Array(b) : null;
+  const alphaBytes = alpha ? convertToUint8Array(alpha) : null;
+  const betaBytes = beta ? convertToUint8Array(beta) : null;
+
+  const message = {
+    registrationKey,
+    a: aBytes,
+    b: bBytes,
+    alpha: alphaBytes,
+    beta: betaBytes,
+  };
+
   client.Register(message, (error, response) => {
     if (error) {
       return res.status(500).send(error);
