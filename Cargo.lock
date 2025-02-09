@@ -63,6 +63,7 @@ dependencies = [
 name = "anonvote_wasm"
 version = "0.1.0"
 dependencies = [
+ "num-bigint",
  "wasm-bindgen",
  "zkp_protocol",
 ]

@@ -1,4 +1,4 @@
-import { generate_key_pair, key_pair_to_json  } from "./anonvote_wasm.js";
+import { generate_key_pair, json_to_key_pair, key_pair_to_json  } from "./anonvote_wasm.js";
 
 const keyFileName = "userKey.anonvote";
 
@@ -42,6 +42,37 @@ function downloadFile(content) {
     link.href = url;
     link.download = keyFileName;
     link.click();
+}
+
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+  
+      reader.onload = function(event) {
+        resolve(event.target.result);
+      };
+  
+      reader.onerror = function(event) {
+        reject(new Error("Error reading file"));
+      };
+  
+      reader.readAsText(file);
+    });
+  }
+
+async function readJSONFile(file) {
+    if(!file) {
+        return undefined;
+    }
+
+    try {
+        const fileContent = await readFileAsText(file);
+        const jsonObject = JSON.parse(JSON.parse(fileContent));
+        return jsonObject;
+      } catch (error) {
+        console.log(error);
+        return undefined;
+      }
 }
 
 function api_call(path, body_str, onOk, onError) {
@@ -107,8 +138,6 @@ function registerUser() {
             beta : generated_key.public_key.beta()
         };
 
-        console.log("Sending request: " , JSON.stringify(registerReq));
-
         api_call(
             '/register', 
             JSON.stringify(registerReq),
@@ -123,40 +152,83 @@ function registerUser() {
             }
         );
     }
-
-    // const validCode = 'SECRET123'; // Example valid code
-    
-    // if (registrationCode === validCode) {
-    //     const secretKey = 'SECRET_KEY_' + Math.random().toString(36).substr(2, 9);
-    //     const blob = new Blob([secretKey], { type: 'text/plain' });
-    //     const url = URL.createObjectURL(blob);
-        
-    //     const link = document.createElement('a');
-    //     link.href = url;
-    //     link.download = 'secret_key.txt';
-    //     link.click();
-        
-    //     message.innerHTML = 'Registration successful! Downloading secret key.';
-    //     message.style.color = 'green';
-    // } else {
-    //     message.innerHTML = 'Invalid registration code.';
-    //     message.style.color = 'red';
-    // }
 }
 
-function submitVote() {
+async function submitVote() {
     const secretKeyFile = document.getElementById('secretKeyFile').files[0];
     const voteOption = document.querySelector('input[name="vote"]:checked');
     const message = document.getElementById('voteMessage');
-    
+
+    const voteOptionInt = parseInt(voteOption.value);
+
     if (!secretKeyFile) {
-        message.innerHTML = 'Please upload your secret key file.';
+        message.innerHTML = 'Please upload your user key file.';
         message.style.color = 'red';
-    } else if (!voteOption) {
+        return;
+    }
+    
+    if (!voteOption || !voteOptionInt) {
         message.innerHTML = 'Please select a vote option.';
         message.style.color = 'red';
-    } else {
-        message.innerHTML = 'Vote submitted successfully!';
-        message.style.color = 'green';
+        return;
     }
+
+    const jsonKeyPair = await readJSONFile(secretKeyFile);
+    const keyPair = json_to_key_pair(jsonKeyPair);
+    
+    if(!keyPair) {
+        message.innerHTML = 'Please upload valid user key file.';
+        message.style.color = 'red';
+        return;
+    }
+
+    const challengeReq = keyPair.public_key.generate_challenge_request();
+
+    let voteReq = {
+        vote : voteOption,
+        a : keyPair.a,
+        b : keyPair.b,
+        alpha : keyPair.alpha,
+        beta : keyPair.beta,
+        ka : challengeReq.ka(),
+        kb : challengeReq.kb()
+    };
+
+    api_call(
+        '/vote', 
+        JSON.stringify(voteReq), 
+        (data) => {
+            message.innerHTML = 'Authentication...';
+            message.style.color = 'blue';
+            validateVote(voteOption, keyPair, challengeReq, data.challenge, data.auth_session_id);
+        },
+        (error) => {
+            message.innerHTML = error;
+            message.style.color = 'red';
+        });
+}
+
+function validateVote(vote, keyPair, challengeReq, challenge, session_id) {
+    const message = document.getElementById('voteMessage');
+
+    let solution = keyPair.private_key.solve(challengeReq.k(), challenge);
+
+    let validationReq = {
+        auth_session_id : session_id,
+        vote : vote,
+        solution : solution
+    };
+
+    api_call(
+        'validate_vote',
+        JSON.stringify(validationReq),
+        _ => {
+            message.innerHTML = 'Voting finished!';
+            message.style.color = 'green';
+        },
+        error => {
+            message.innerHTML = error;
+            message.style.color = 'red';
+        }
+    );
 }

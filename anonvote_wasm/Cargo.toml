@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 zkp_protocol = { path = "../zkp_protocol" }
+num-bigint = "0.4"
 wasm-bindgen = "0.2"
 
 [lib]
