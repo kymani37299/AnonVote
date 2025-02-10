@@ -130,6 +130,12 @@ function registerUser() {
         message.style.color = 'red';
     } else {
         const generated_key = generate_key_pair();
+        if(!generated_key) {
+            message.innerHTML = 'Internal error, please try again later';
+            message.style.color = 'red';
+            return;
+        }
+
         const registerReq = {
             registrationKey : registrationCode,
             a : generated_key.public_key.a(),

@@ -24,6 +24,10 @@ export function generate_key_pair() {
 }
 
 export function key_pair_to_json(key_pair) {
+    if (!wasmInitialized) {
+        return undefined;
+    }
+
     const jsObject = {
         secret : key_pair.secret_key.secret(),
         a : key_pair.public_key.a(),
@@ -35,6 +39,10 @@ export function key_pair_to_json(key_pair) {
 }
 
 export function json_to_key_pair(jsObject) {
+    if (!wasmInitialized) {
+        return undefined;
+    }
+
     if(!jsObject)
         return undefined;
 
