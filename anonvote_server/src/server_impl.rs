@@ -84,7 +84,7 @@ impl AnonVote for AnonVoteImpl {
         // Since we are removing and re-adding the code in some cases
 
         let req = req.into_inner();
-        let public_key = PublicKey::from(req.a,req.b,req.alpha,req.beta);
+        let public_key = PublicKey::from_bytes_be(&req.a, &req.b, &req.alpha, &req.beta);
         let user_data = UserData { key : public_key };
         let user_data_valid = AnonVoteImpl::validate_user_data(&user_data);
         if !user_data_valid {
@@ -108,7 +108,7 @@ impl AnonVote for AnonVoteImpl {
         let req= req.into_inner();
 
         // Get user hash
-        let public_key = PublicKey::from(req.a,req.b,req.alpha,req.beta);
+        let public_key = PublicKey::from_bytes_be(&req.a, &req.b, &req.alpha, &req.beta);
         let user_data = UserData { key : public_key };
         let user_hash = user_data.get_hash();
 

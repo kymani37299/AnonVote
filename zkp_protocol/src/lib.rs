@@ -50,21 +50,12 @@ impl PublicKey {
         }
     }
 
-    pub fn from(a : Vec<u8>, b : Vec<u8>, alpha : Vec<u8>, beta : Vec<u8>) -> PublicKey {
+    pub fn from_bytes_be(a : &Vec<u8>, b : &Vec<u8>, alpha : &Vec<u8>, beta : &Vec<u8>) -> PublicKey {
         PublicKey {
             a : BigUint::from_bytes_be(&a),
             b : BigUint::from_bytes_be(&b),
             alpha : BigUint::from_bytes_be(&alpha),
             beta : BigUint::from_bytes_be(&beta),
-        }
-    }
-
-    pub fn from_bytes_be(a : &Vec<u8>, b : &Vec<u8>, alpha : &Vec<u8>, beta : &Vec<u8>) -> PublicKey {
-        PublicKey {
-            a : BigUint::from_bytes_be(a),
-            b : BigUint::from_bytes_be(b),
-            alpha : BigUint::from_bytes_be(alpha),
-            beta : BigUint::from_bytes_be(beta),
         }
     }
 
