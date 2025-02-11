@@ -6,9 +6,9 @@ init().then(wasm => {
     wasmInitialized = true;
 });
 
-const convertToUint8Array = (obj) => {
+export function convert_to_uint8_array(obj) {
     return new Uint8Array(Object.values(obj));
-  };
+}
 
 export function generate_key_pair() {
     if (!wasmInitialized) {
@@ -49,11 +49,11 @@ export function json_to_key_pair(jsObject) {
     const {a,b,alpha,beta,secret} = jsObject;
 
     // Ensure all byte arrays are Uint8Arrays
-    const aBytes = a ? convertToUint8Array(a) : null;
-    const bBytes = b ? convertToUint8Array(b) : null;
-    const alphaBytes = alpha ? convertToUint8Array(alpha) : null;
-    const betaBytes = beta ? convertToUint8Array(beta) : null;
-    const secretBytes = secret ? convertToUint8Array(secret) : null;
+    const aBytes = a ? convert_to_uint8_array(a) : null;
+    const bBytes = b ? convert_to_uint8_array(b) : null;
+    const alphaBytes = alpha ? convert_to_uint8_array(alpha) : null;
+    const betaBytes = beta ? convert_to_uint8_array(beta) : null;
+    const secretBytes = secret ? convert_to_uint8_array(secret) : null;
 
     let public_key = PublicKeyWasm.new(
         aBytes, 

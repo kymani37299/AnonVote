@@ -1,4 +1,4 @@
-import { generate_key_pair, json_to_key_pair, key_pair_to_json  } from "./anonvote_wasm.js";
+import { generate_key_pair, json_to_key_pair, key_pair_to_json, convert_to_uint8_array } from "./anonvote_wasm.js";
 
 const keyFileName = "userKey.anonvote";
 
@@ -206,7 +206,7 @@ async function submitVote() {
         (data) => {
             message.innerHTML = 'Authentication...';
             message.style.color = 'blue';
-            validateVote(voteOptionInt, keyPair, challengeReq, data.challenge, data.authSessionId);
+            validateVote(voteOptionInt, keyPair, challengeReq, data.challenge.data, data.authSessionId);
         },
         (error) => {
             message.innerHTML = error;
@@ -217,7 +217,7 @@ async function submitVote() {
 function validateVote(vote, keyPair, challengeReq, challenge, session_id) {
     const message = document.getElementById('voteMessage');
 
-    let solution = keyPair.private_key.solve(challengeReq.k(), challenge);
+    let solution = keyPair.private_key.solve(challengeReq.k(), convert_to_uint8_array(challenge));
 
     let validationReq = {
         auth_session_id : session_id,
