@@ -8,7 +8,7 @@ use anonvote_proto::proto::anonvote::{ValidateIdReq, ValidateIdRes, RegisterReq,
 use num_bigint::BigUint;
 use tonic::{Request, Response, Status, Code };
 use rand::distr::{Alphanumeric, SampleString};
-use zkp_protocol::{zkp_util, PublicKey};
+use zkp_protocol::{zkp_constants, zkp_util, PublicKey};
 
 const REGISTRATION_KEY_LEN : usize = 16;
 const AUTH_KEY_LEN : usize = 16;
@@ -41,8 +41,40 @@ impl AnonVoteImpl {
     }
 
     fn validate_user_data(user : &UserData) -> bool {
-        // TODO: Make more detailed validation of public key
-        *user.key.a() > BigUint::ZERO && *user.key.b() > BigUint::ZERO && *user.key.beta() > BigUint::ZERO   
+
+        // All numbers must be non-zero values
+        if *user.key.a() == BigUint::ZERO || *user.key.b() == BigUint::ZERO || 
+        *user.key.alpha() == BigUint::ZERO || *user.key.beta() == BigUint::ZERO {
+            return false;
+        }
+
+        // All numbers cannot be trivial (one)
+        if *user.key.a() == zkp_constants::one() || *user.key.b() == zkp_constants::one() || 
+        *user.key.alpha() == zkp_constants::one() || *user.key.beta() == zkp_constants::one() {
+            return false;
+        }
+
+        // Alpha and beta must be different
+        if *user.key.alpha() == *user.key.beta() {
+            return false;
+        }
+
+        // All numbers must be less than p
+        if *user.key.a() >= zkp_constants::p() || *user.key.b() >= zkp_constants::p() || 
+        *user.key.alpha() >= zkp_constants::p() || *user.key.beta() >= zkp_constants::p() {
+            return false;
+        }
+
+        // Alpha and beta must be generators of order of q
+        // If x is generator of order q => x^q mod p = 1
+        if zkp_constants::one() != user.key.alpha().modpow(&zkp_constants::q(), &zkp_constants::p()) {
+            return false;
+        }
+        if zkp_constants::one() != user.key.beta().modpow(&zkp_constants::q(), &zkp_constants::p()) {
+            return false;
+        }
+        
+        return true;
     }
 
     fn vote_valid(&self, vote : &u32) -> bool {
