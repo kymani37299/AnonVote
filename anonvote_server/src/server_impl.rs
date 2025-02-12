@@ -49,8 +49,8 @@ impl AnonVoteImpl {
         }
 
         // All numbers cannot be trivial (one)
-        if *user.key.a() == zkp_constants::one() || *user.key.b() == zkp_constants::one() || 
-        *user.key.alpha() == zkp_constants::one() || *user.key.beta() == zkp_constants::one() {
+        if *user.key.a() == *zkp_constants::one() || *user.key.b() == *zkp_constants::one() || 
+        *user.key.alpha() == *zkp_constants::one() || *user.key.beta() == *zkp_constants::one() {
             return false;
         }
 
@@ -60,17 +60,17 @@ impl AnonVoteImpl {
         }
 
         // All numbers must be less than p
-        if *user.key.a() >= zkp_constants::p() || *user.key.b() >= zkp_constants::p() || 
-        *user.key.alpha() >= zkp_constants::p() || *user.key.beta() >= zkp_constants::p() {
+        if *user.key.a() >= *zkp_constants::p() || *user.key.b() >= *zkp_constants::p() || 
+        *user.key.alpha() >= *zkp_constants::p() || *user.key.beta() >= *zkp_constants::p() {
             return false;
         }
 
         // Alpha and beta must be generators of order of q
         // If x is generator of order q => x^q mod p = 1
-        if zkp_constants::one() != user.key.alpha().modpow(&zkp_constants::q(), &zkp_constants::p()) {
+        if *zkp_constants::one() != user.key.alpha().modpow(&zkp_constants::q(), &zkp_constants::p()) {
             return false;
         }
-        if zkp_constants::one() != user.key.beta().modpow(&zkp_constants::q(), &zkp_constants::p()) {
+        if *zkp_constants::one() != user.key.beta().modpow(&zkp_constants::q(), &zkp_constants::p()) {
             return false;
         }
         
