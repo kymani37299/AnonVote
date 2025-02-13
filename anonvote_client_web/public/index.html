@@ -14,6 +14,7 @@
         <button id="validateIdSection">Validate ID</button>
         <button id="registerSection">Register</button>
         <button id="voteSection">Vote</button>
+        <button id="resultsSection">Results</button>
     </div>
 
     <!-- Validate ID Section -->
@@ -37,16 +38,16 @@
     <div id="vote" class="section" style="display: none;">
         <h2>Vote</h2>
         <input type="file" id="secretKeyFile" accept=".anonvote">
-        <div>
-            <input type="radio" id="option1" name="vote" value="1">
-            <label for="option1">Option 1</label>
-        </div>
-        <div>
-            <input type="radio" id="option2" name="vote" value="2">
-            <label for="option2">Option 2</label>
+        <div id="voteOptions">
         </div>
         <button id="submitVoteButton">Submit Vote</button>
         <p id="voteMessage"></p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results" class="section" style="display: none;">
+        <h2>Results</h2>
+        <div id="resultsDiv"></div>
     </div>
 </div>
 

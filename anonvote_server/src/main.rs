@@ -14,7 +14,8 @@ use db::AnonVoteDB;
 async fn main() {
     let addr = "127.0.0.1:50051".to_string();
     let db = AnonVoteDB::connect();
-    let anonvote_impl = AnonVoteImpl::new(db, 3);
+    let vote_option_count = db.get_vote_options_count() as u32;
+    let anonvote_impl = AnonVoteImpl::new(db, vote_option_count);
 
     println!("Starting server...");
 

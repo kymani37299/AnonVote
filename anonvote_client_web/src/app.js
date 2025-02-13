@@ -25,6 +25,24 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
+app.get('/vote_options', (_, res) => {
+  client.GetVoteOptions({}, (error, response) => {
+    if (error) {
+      return res.status(500).send(error);
+    }
+    res.json(response);
+  });
+});
+
+app.get('/vote_results', (_, res) => {
+  client.GetResults({}, (error, response) => {
+    if (error) {
+      return res.status(500).send(error);
+    }
+    res.json(response);
+  });
+});
+
 app.post('/validate_id', (req, res) => {
     const id = req.body.id || '';
     client.ValidateID({ id }, (error, response) => {

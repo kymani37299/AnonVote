@@ -66,6 +66,24 @@ pub struct ValidateVoteReq {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ValidateVoteRes {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetVoteOptionsReq {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetVoteOptionsRes {
+    #[prost(string, repeated, tag = "1")]
+    pub options: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetResultsReq {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetResultsRes {
+    #[prost(uint32, repeated, tag = "1")]
+    pub votes: ::prost::alloc::vec::Vec<u32>,
+}
 /// Generated client implementations.
 pub mod anon_vote_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -239,6 +257,53 @@ pub mod anon_vote_client {
                 .insert(GrpcMethod::new("anonvote.AnonVote", "ValidateVote"));
             self.inner.unary(req, path, codec).await
         }
+        pub async fn get_vote_options(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetVoteOptionsReq>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetVoteOptionsRes>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/anonvote.AnonVote/GetVoteOptions",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("anonvote.AnonVote", "GetVoteOptions"));
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_results(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetResultsReq>,
+        ) -> std::result::Result<tonic::Response<super::GetResultsRes>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/anonvote.AnonVote/GetResults",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("anonvote.AnonVote", "GetResults"));
+            self.inner.unary(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -264,6 +329,17 @@ pub mod anon_vote_server {
             &self,
             request: tonic::Request<super::ValidateVoteReq>,
         ) -> std::result::Result<tonic::Response<super::ValidateVoteRes>, tonic::Status>;
+        async fn get_vote_options(
+            &self,
+            request: tonic::Request<super::GetVoteOptionsReq>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetVoteOptionsRes>,
+            tonic::Status,
+        >;
+        async fn get_results(
+            &self,
+            request: tonic::Request<super::GetResultsReq>,
+        ) -> std::result::Result<tonic::Response<super::GetResultsRes>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct AnonVoteServer<T: AnonVote> {
@@ -499,6 +575,94 @@ pub mod anon_vote_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = ValidateVoteSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/anonvote.AnonVote/GetVoteOptions" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetVoteOptionsSvc<T: AnonVote>(pub Arc<T>);
+                    impl<
+                        T: AnonVote,
+                    > tonic::server::UnaryService<super::GetVoteOptionsReq>
+                    for GetVoteOptionsSvc<T> {
+                        type Response = super::GetVoteOptionsRes;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetVoteOptionsReq>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                (*inner).get_vote_options(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetVoteOptionsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/anonvote.AnonVote/GetResults" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetResultsSvc<T: AnonVote>(pub Arc<T>);
+                    impl<T: AnonVote> tonic::server::UnaryService<super::GetResultsReq>
+                    for GetResultsSvc<T> {
+                        type Response = super::GetResultsRes;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetResultsReq>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move { (*inner).get_results(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetResultsSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

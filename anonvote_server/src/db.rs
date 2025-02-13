@@ -1,10 +1,9 @@
 use std::collections::{HashSet, HashMap};
 use std::sync::Mutex;
+use std::vec::Vec;
 
 use crate::model::user_data::UserData;
 use crate::model::challenge_data::ChallengeData;
-
-
 
 #[derive(Default)]
 pub struct AnonVoteDB {
@@ -106,5 +105,33 @@ impl AnonVoteDB {
     pub fn user_voted(&self, user_hash : u64) -> bool {
         let votes_map = &mut self.votes.lock().unwrap();
         votes_map.contains_key(&user_hash)
+    }
+
+    pub fn get_vote_options(&self) -> Vec<String> {
+        // Placeholder values
+        let vote_options = vec![
+        "First vote - Always the first!".to_string(), 
+        "Mr. Placeholder".to_string(), 
+        "Final Choice – The last name you'll pick!".to_string()
+        ];
+        vote_options
+    }
+
+    pub fn get_vote_options_count(&self) -> usize {
+        self.get_vote_options().len()
+    }
+
+    pub fn get_vote_results(&self) -> Vec<u32> {
+        let votes_map = &mut self.votes.lock().unwrap();
+        let vote_option_count = self.get_vote_options_count();
+        let mut votes = vec![0u32; vote_option_count];
+        for vote in votes_map.values() {
+            let vote = *vote as usize;
+            if vote >= vote_option_count {
+                continue;
+            }
+            votes[vote] += 1;
+        }
+        votes
     }
 }

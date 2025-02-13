@@ -4,7 +4,7 @@ const keyFileName = "userKey.anonvote";
 
 window.addEventListener('load', setup);
 
-function setup() {
+async function setup() {
     const validateIdSection = document.getElementById("validateIdSection");
     validateIdSection.onclick = () => showSection('validate');
 
@@ -14,6 +14,9 @@ function setup() {
     const voteSection = document.getElementById("voteSection");
     voteSection.onclick = () => showSection('vote');
 
+    const resultsSection = document.getElementById("resultsSection");
+    resultsSection.onclick = () => showResults();
+
     const validateIdButton = document.getElementById("validateIdButton");
     validateIdButton.onclick = () => validateID();
 
@@ -22,6 +25,49 @@ function setup() {
 
     const submitVoteButton = document.getElementById("submitVoteButton");
     submitVoteButton.onclick = () => submitVote();
+
+    const voteOptionsDiv = document.getElementById("voteOptions");
+
+    fetch('/vote_options', {
+        method: 'GET'
+      })
+      .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                const errorMessage = errorData.details || 'An unknown error occurred.';
+                throw new Error(`${errorMessage}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        let voteOptions = data.options;
+        voteOptions.forEach((optionText, index) => {
+            const optionValue = index + 1; // Value 1, 2, 3
+            
+            const optionDiv = document.createElement("div");
+    
+            const radioInput = document.createElement("input");
+            radioInput.type = "radio";
+            radioInput.id = `option${optionValue}`;
+            radioInput.name = "vote";
+            radioInput.value = optionValue;
+    
+            const label = document.createElement("label");
+            label.htmlFor = `option${optionValue}`;
+            label.textContent = optionText;
+    
+            optionDiv.appendChild(radioInput);
+            optionDiv.appendChild(label);
+            voteOptionsDiv.appendChild(optionDiv);
+        });
+    })
+    .catch(error => {
+        const errorLabel = document.createElement("p");
+        errorLabel.textContent = error;
+        errorLabel.style.color = 'red';
+        voteOptionsDiv.appendChild(errorLabel);
+    });
 }
 
 function showSection(section) {
@@ -31,6 +77,123 @@ function showSection(section) {
     
     // Show selected section
     document.getElementById(section).style.display = 'block';
+}
+
+async function showResults() {
+    showSection('results');
+
+    const resultsDiv = document.getElementById("resultsDiv");
+    resultsDiv.innerHTML = "";
+
+    let loadingLabel = document.createElement("p");
+    loadingLabel.textContent = "Loading results...";
+
+    resultsDiv.appendChild(loadingLabel);
+
+    let voteOptions = null;
+
+    await fetch('/vote_options', {
+        method: 'GET'
+      })
+      .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                const errorMessage = errorData.details || 'An unknown error occurred.';
+                throw new Error(`${errorMessage}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        voteOptions = data.options;
+    })
+    .catch(error => {
+        loadingLabel.textContent = error;
+        loadingLabel.style.color = 'red';
+    });
+
+    if(!voteOptions) {
+        return;
+    }
+
+    let voteResults = null;
+
+    await fetch('/vote_results', {
+        method: 'GET'
+      })
+      .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                const errorMessage = errorData.details || 'An unknown error occurred.';
+                throw new Error(`${errorMessage}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        voteResults = data.votes;
+    })
+    .catch(error => {
+        const errorLabel = document.createElement("p");
+        errorLabel.textContent = error;
+        errorLabel.style.color = 'red';
+        resultsDiv.appendChild(errorLabel);
+    });
+
+    if(!voteResults) {
+        return;
+    }
+
+    let numOptions = Math.min(voteResults.length, voteOptions.length); // Those 2 just be the same but just in case
+
+    let voteCount = 0;
+    for(let i=0;i<numOptions;i++) {
+        voteCount += voteResults[i];
+    }
+
+    resultsDiv.innerHTML = "";
+
+    // Create a styled container
+    let resultsContainer = document.createElement("div");
+    resultsContainer.style.padding = "10px";
+    resultsContainer.style.border = "1px solid #ccc";
+    resultsContainer.style.borderRadius = "8px";
+    resultsContainer.style.backgroundColor = "#f9f9f9";
+    resultsContainer.style.width = "fit-content";
+    resultsContainer.style.marginTop = "10px";
+    
+    // Total votes label
+    let totalVotesLabel = document.createElement("h3");
+    totalVotesLabel.textContent = `Total Votes: ${voteCount}`;
+    totalVotesLabel.style.marginBottom = "10px";
+    resultsContainer.appendChild(totalVotesLabel);
+    
+    // Vote results
+    for (let i = 0; i < numOptions; i++) {
+        let votePercent = voteCount === 0 ? 0.0 : (100.0 * voteResults[i] / voteCount).toFixed(2);
+        
+        let resultItem = document.createElement("div");
+        resultItem.style.display = "flex";
+        resultItem.style.justifyContent = "space-between";
+        resultItem.style.padding = "5px 10px";
+        resultItem.style.borderRadius = "5px";
+        resultItem.style.backgroundColor = "#e0e0e0";
+        resultItem.style.marginBottom = "5px";
+        
+        let label = document.createElement("span");
+        label.textContent = voteOptions[i];
+    
+        let percentage = document.createElement("span");
+        percentage.textContent = `${votePercent}%`;
+        percentage.style.fontWeight = "bold";
+    
+        resultItem.appendChild(label);
+        resultItem.appendChild(percentage);
+        resultsContainer.appendChild(resultItem);
+    }
+    
+    // Append to resultsDiv
+    resultsDiv.appendChild(resultsContainer);
 }
 
 function downloadFile(content) {

@@ -44,9 +44,26 @@ message ValidateVoteReq {
 message ValidateVoteRes {
 }
 
+message GetVoteOptionsReq {
+
+}
+
+message GetVoteOptionsRes {
+    repeated string options = 1;
+}
+
+message GetResultsReq { 
+}
+
+message GetResultsRes {
+    repeated uint32 votes = 1;
+}
+
 service AnonVote {
     rpc ValidateID(ValidateIDReq) returns (ValidateIDRes) {}
     rpc Register(RegisterReq) returns (RegisterRes) {}
     rpc Vote(VoteReq) returns (VoteRes) {}
     rpc ValidateVote(ValidateVoteReq) returns (ValidateVoteRes) {}
+    rpc GetVoteOptions(GetVoteOptionsReq) returns (GetVoteOptionsRes) {}
+    rpc GetResults(GetResultsReq) returns (GetResultsRes) {}
 }

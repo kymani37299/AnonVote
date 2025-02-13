@@ -3,7 +3,7 @@ use crate::model::user_data::UserData;
 use crate::model::challenge_data::ChallengeData;
 
 use anonvote_proto::proto::anonvote::anon_vote_server::AnonVote;
-use anonvote_proto::proto::anonvote::{ValidateIdReq, ValidateIdRes, RegisterReq, RegisterRes, VoteReq, VoteRes, ValidateVoteReq, ValidateVoteRes};
+use anonvote_proto::proto::anonvote::{ValidateIdReq, ValidateIdRes, RegisterReq, RegisterRes, VoteReq, VoteRes, ValidateVoteReq, ValidateVoteRes, GetVoteOptionsReq, GetVoteOptionsRes, GetResultsReq, GetResultsRes};
 
 use num_bigint::BigUint;
 use tonic::{Request, Response, Status, Code };
@@ -238,6 +238,20 @@ impl AnonVote for AnonVoteImpl {
         }
 
         Ok(Response::new(ValidateVoteRes { }))
+    }
+
+    async fn get_vote_options(&self, _req : Request<GetVoteOptionsReq>) -> Result<Response<GetVoteOptionsRes>, Status> {
+        let options = self.db.get_vote_options();
+        Ok(Response::new(GetVoteOptionsRes {
+            options
+        }))
+    }
+
+    async fn get_results(&self, _req : Request<GetResultsReq>) -> Result<Response<GetResultsRes>, Status> {
+        let votes= self.db.get_vote_results();
+        Ok(Response::new(GetResultsRes {
+            votes
+        }))
     }
 }
 
