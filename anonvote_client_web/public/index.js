@@ -44,23 +44,31 @@ async function setup() {
         let voteOptions = data.options;
         voteOptions.forEach((optionText, index) => {
             const optionValue = index + 1; // Value 1, 2, 3
-            
+        
+            // Create option container with a class for styling
             const optionDiv = document.createElement("div");
-    
+            optionDiv.classList.add("vote-option");
+        
+            // Create radio input
             const radioInput = document.createElement("input");
             radioInput.type = "radio";
             radioInput.id = `option${optionValue}`;
             radioInput.name = "vote";
             radioInput.value = optionValue;
-    
+        
+            // Create label
             const label = document.createElement("label");
             label.htmlFor = `option${optionValue}`;
             label.textContent = optionText;
-    
+        
+            // Append radio button first, then label
             optionDiv.appendChild(radioInput);
             optionDiv.appendChild(label);
+        
+            // Append to the container
             voteOptionsDiv.appendChild(optionDiv);
         });
+        
     })
     .catch(error => {
         const errorLabel = document.createElement("p");
@@ -328,7 +336,7 @@ async function submitVote() {
     const voteOption = document.querySelector('input[name="vote"]:checked');
     const message = document.getElementById('voteMessage');
 
-    const voteOptionInt = parseInt(voteOption.value);
+    let voteOptionInt = parseInt(voteOption.value);
 
     if (!secretKeyFile) {
         message.innerHTML = 'Please upload your user key file.';
@@ -341,6 +349,8 @@ async function submitVote() {
         message.style.color = 'red';
         return;
     }
+
+    voteOptionInt = voteOptionInt - 1; // Votes are starting at 0
 
     const jsonKeyPair = await readJSONFile(secretKeyFile);
     const keyPair = json_to_key_pair(jsonKeyPair);

@@ -17,37 +17,43 @@
         <button id="resultsSection">Results</button>
     </div>
 
-    <!-- Validate ID Section -->
-    <div id="validate" class="section" style="display: none;">
-        <h2>Validate ID</h2>
-        <input type="file" id="idFile" accept="image/*">
-        <input type="text" id="idNumber" placeholder="Enter ID Number">
-        <button id="validateIdButton">Submit</button>
-        <p id="validateMessage"></p>
-    </div>
-
-    <!-- Register Section -->
-    <div id="register" class="section" style="display: none;">
-        <h2>Register</h2>
-        <input type="text" id="registrationCode" placeholder="Enter Registration Code">
-        <button id="registerUserButton">Register</button>
-        <p id="registerMessage"></p>
-    </div>
-
-    <!-- Vote Section -->
-    <div id="vote" class="section" style="display: none;">
-        <h2>Vote</h2>
-        <input type="file" id="secretKeyFile" accept=".anonvote">
-        <div id="voteOptions">
+    <div class="content">
+        <!-- Validate ID Section -->
+        <div id="validate" class="section" style="display: none;">
+            <h2>Validate ID</h2>
+            <input type="file" id="idFile" accept="image/*">
+            <input type="text" id="idNumber" placeholder="Enter ID Number">
+            <button id="validateIdButton">Submit</button>
+            <p id="validateMessage"></p>
         </div>
-        <button id="submitVoteButton">Submit Vote</button>
-        <p id="voteMessage"></p>
-    </div>
 
-    <!-- Results Section -->
-    <div id="results" class="section" style="display: none;">
-        <h2>Results</h2>
-        <div id="resultsDiv"></div>
+        <!-- Register Section -->
+        <div id="register" class="section" style="display: none;">
+            <h2>Register</h2>
+            <input type="text" id="registrationCode" placeholder="Enter Registration Code">
+            <button id="registerUserButton">Register</button>
+            <p id="registerMessage"></p>
+        </div>
+
+        <!-- Vote Section -->
+        <div id="vote" class="section" style="display: none;">
+            <h2>Vote</h2>
+            <label for="secretKeyFile" class="file-label">Provide key</label>
+            <input type="file" id="secretKeyFile" accept=".anonvote">
+            
+            <div id="voteOptions" class="vote-options">
+                <!-- Dynamic vote options will be inserted here -->
+            </div>
+            
+            <button id="submitVoteButton">Submit Vote</button>
+            <p id="voteMessage"></p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="section" style="display: none;">
+            <h2>Results</h2>
+            <div id="resultsDiv"></div>
+        </div>
     </div>
 </div>
 

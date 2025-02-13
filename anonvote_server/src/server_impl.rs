@@ -78,7 +78,7 @@ impl AnonVoteImpl {
     }
 
     fn vote_valid(&self, vote : &u32) -> bool {
-        *vote > 0 && *vote <= self.vote_option_count
+        *vote < self.vote_option_count
     }
 }
 
