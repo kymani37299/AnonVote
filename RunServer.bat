@@ -1,0 +1,1 @@
+cargo run --package anonvote_server

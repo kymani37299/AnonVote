@@ -1,0 +1,7 @@
+1. Install rust : https://www.rust-lang.org/tools/install
+2. Install node.js : https://nodejs.org/en/download
+3. Install protoc: https://github.com/protocolbuffers/protobuf/releases (and put it into path)
+4. Run Setup.bat (for Windows)
+5. Run server with : RunServer.bat
+6. Run client with : RunClient.bat
+7. Open the client in browser on: localhost:3000
