@@ -1,10 +1,10 @@
 # Anonymous Voting Demo
 
-This project is a demonstration of an anonymous voting system implemented in Rust. The primary goal is to explore Rust's capabilities, including multi-package communication, library features, testing, and gRPC integration. The project also utilizes the Chaum-Pedersen Zero-Knowledge Proof (ZKP) Protocol for cryptographic verification.
+This project is a demonstration of an anonymous voting system implemented in Rust. The primary goal is to explore Rust's capabilities, including multi-crate communication, library features, testing, and gRPC integration. The project also utilizes the Chaum-Pedersen Zero-Knowledge Proof (ZKP) Protocol for cryptographic verification.
 
 ## Features
 - **Chaum-Pedersen Zero-Knowledge Proof (ZKP) Protocol**
-- **Multi-package Rust communication**
+- **Multi-crate Rust communication**
 - **Rust library features**
 - **Rust unit tests**
 - **gRPC integration using `.proto` files**
